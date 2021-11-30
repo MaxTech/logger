@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 )
 
 type appLogger struct {
@@ -28,8 +27,17 @@ func (al appLogger) Error(v ...interface{}) {
 }
 
 func (al appLogger) Fatal(v ...interface{}) {
-	al.Error(v...)
-	os.Exit(2)
+	v = append([]interface{}{
+		"[FATAL]",
+	}, v...)
+	al.fatal(v...)
+}
+
+func (al appLogger) Panic(v ...interface{}) {
+	v = append([]interface{}{
+		"[PANIC]",
+	}, v...)
+	al.panic(v...)
 }
 
 func (al appLogger) Warn(v ...interface{}) {
@@ -53,4 +61,22 @@ func (al appLogger) output(v ...interface{}) {
 		}, v...)
 	}
 	al.logger.Println(v...)
+}
+
+func (al appLogger) fatal(v ...interface{}) {
+	if len(al.loggerName) > 0 {
+		v = append([]interface{}{
+			fmt.Sprintf("[%s]", al.loggerName),
+		}, v...)
+	}
+	al.logger.Fatalln(v...)
+}
+
+func (al appLogger) panic(v ...interface{}) {
+	if len(al.loggerName) > 0 {
+		v = append([]interface{}{
+			fmt.Sprintf("[%s]", al.loggerName),
+		}, v...)
+	}
+	al.logger.Panicln(v...)
 }
