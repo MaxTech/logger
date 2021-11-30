@@ -24,12 +24,7 @@ func (al appLogger) Error(v ...interface{}) {
 	v = append([]interface{}{
 		"[ERROR]",
 	}, v...)
-	if len(al.loggerName) > 0 {
-		v = append([]interface{}{
-			fmt.Sprintf("[%s]", al.loggerName),
-		}, v...)
-	}
-	al.logger.Println(v...)
+	al.output(v...)
 }
 
 func (al appLogger) Fatal(v ...interface{}) {
@@ -41,18 +36,17 @@ func (al appLogger) Warn(v ...interface{}) {
 	v = append([]interface{}{
 		"[ WARN]",
 	}, v...)
-	if len(al.loggerName) > 0 {
-		v = append([]interface{}{
-			fmt.Sprintf("[%s]", al.loggerName),
-		}, v...)
-	}
-	al.logger.Println(v...)
+	al.output(v...)
 }
 
 func (al appLogger) Info(v ...interface{}) {
 	v = append([]interface{}{
 		"[ INFO]",
 	}, v...)
+	al.output(v...)
+}
+
+func (al appLogger) output(v ...interface{}) {
 	if len(al.loggerName) > 0 {
 		v = append([]interface{}{
 			fmt.Sprintf("[%s]", al.loggerName),
