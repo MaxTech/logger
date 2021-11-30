@@ -8,22 +8,28 @@ import (
 
 type appLogger struct {
 	loggerName string
-	logger     *log.Logger
+	stdLogger     *log.Logger
+	errLogger     *log.Logger
 }
 
-func NewLogger(_loggerName string, _writer io.Writer) *appLogger {
-	return &appLogger{loggerName: _loggerName, logger: log.New(_writer, "", log.LstdFlags)}
+func NewLogger(_loggerName string, _stdWriter, _errWriter io.Writer) *appLogger {
+	return &appLogger{
+		loggerName: _loggerName,
+		stdLogger: log.New(_stdWriter, "", log.LstdFlags),
+		errLogger: log.New(_errWriter, "", log.LstdFlags),
+	}
 }
 
-func (al *appLogger) ChangeWriter(_writer io.Writer) {
-	al.logger.SetOutput(_writer)
+func (al *appLogger) ChangeWriter(_stdWriter, _errWriter io.Writer) {
+	al.stdLogger.SetOutput(_stdWriter)
+	al.errLogger.SetOutput(_errWriter)
 }
 
 func (al appLogger) Error(v ...interface{}) {
 	v = append([]interface{}{
 		"[ERROR]",
 	}, v...)
-	al.output(v...)
+	al.error(v...)
 }
 
 func (al appLogger) Fatal(v ...interface{}) {
@@ -60,7 +66,16 @@ func (al appLogger) output(v ...interface{}) {
 			fmt.Sprintf("[%s]", al.loggerName),
 		}, v...)
 	}
-	al.logger.Println(v...)
+	al.stdLogger.Println(v...)
+}
+
+func (al appLogger) error(v ...interface{}) {
+	if len(al.loggerName) > 0 {
+		v = append([]interface{}{
+			fmt.Sprintf("[%s]", al.loggerName),
+		}, v...)
+	}
+	al.errLogger.Println(v...)
 }
 
 func (al appLogger) fatal(v ...interface{}) {
@@ -69,7 +84,7 @@ func (al appLogger) fatal(v ...interface{}) {
 			fmt.Sprintf("[%s]", al.loggerName),
 		}, v...)
 	}
-	al.logger.Fatalln(v...)
+	al.errLogger.Fatalln(v...)
 }
 
 func (al appLogger) panic(v ...interface{}) {
@@ -78,5 +93,5 @@ func (al appLogger) panic(v ...interface{}) {
 			fmt.Sprintf("[%s]", al.loggerName),
 		}, v...)
 	}
-	al.logger.Panicln(v...)
+	al.errLogger.Panicln(v...)
 }
