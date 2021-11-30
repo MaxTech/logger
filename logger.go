@@ -1,52 +1,62 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
 )
 
 type appLogger struct {
-	logger *log.Logger
+	loggerName string
+	logger     *log.Logger
 }
 
-var (
-	stdLogger *appLogger
-	errLogger *appLogger
-)
-
-func init() {
-	stdLogger = &appLogger{logger: log.New(os.Stdout, "", log.LstdFlags)}
-	errLogger = &appLogger{logger: log.New(os.Stderr, "", log.LstdFlags)}
+func NewLogger(_loggerName string, _writer io.Writer) *appLogger {
+	return &appLogger{loggerName: _loggerName, logger: log.New(_writer, "", log.LstdFlags)}
 }
 
-func InitLoggerByWriter(_stdWriter, _errWriter io.Writer)  {
-	stdLogger = &appLogger{logger: log.New(_stdWriter, "", log.LstdFlags)}
-	errLogger = &appLogger{logger: log.New(_errWriter, "", log.LstdFlags)}
+func (al *appLogger) ChangeWriter(_writer io.Writer) {
+	al.logger.SetOutput(_writer)
 }
 
-func Error(v ...interface{}) {
+func (al appLogger) Error(v ...interface{}) {
 	v = append([]interface{}{
 		"[ERROR]",
 	}, v...)
-	errLogger.logger.Println(v...)
+	if len(al.loggerName) > 0 {
+		v = append([]interface{}{
+			fmt.Sprintf("[%s]", al.loggerName),
+		}, v...)
+	}
+	al.logger.Println(v...)
 }
 
-func Warn(v ...interface{}) {
+func (al appLogger) Fatal(v ...interface{}) {
+	al.Error(v...)
+	os.Exit(2)
+}
+
+func (al appLogger) Warn(v ...interface{}) {
 	v = append([]interface{}{
 		"[ WARN]",
 	}, v...)
-	errLogger.logger.Println(v...)
+	if len(al.loggerName) > 0 {
+		v = append([]interface{}{
+			fmt.Sprintf("[%s]", al.loggerName),
+		}, v...)
+	}
+	al.logger.Println(v...)
 }
 
-func Info(v ...interface{}) {
+func (al appLogger) Info(v ...interface{}) {
 	v = append([]interface{}{
 		"[ INFO]",
 	}, v...)
-	stdLogger.logger.Println(v...)
-}
-
-func Fatal(v ...interface{}) {
-	Error(v...)
-	os.Exit(1)
+	if len(al.loggerName) > 0 {
+		v = append([]interface{}{
+			fmt.Sprintf("[%s]", al.loggerName),
+		}, v...)
+	}
+	al.logger.Println(v...)
 }
