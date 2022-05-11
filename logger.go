@@ -1,61 +1,96 @@
 package logger
 
 import (
-	"fmt"
 	"io"
 	"log"
+	"os"
+)
+
+type LogLevel int
+
+const (
+	LogLevelDebug LogLevel = 1
+	LogLevelInfo  LogLevel = 2
+	LogLevelWarn  LogLevel = 3
+	LogLevelError LogLevel = 4
+	LogLevelFatal LogLevel = 5
 )
 
 type appLogger struct {
-	loggerName string
-	stdLogger  *log.Logger
-	errLogger  *log.Logger
+	logger *log.Logger
 }
 
-func NewLogger(_loggerName string, _stdWriter, _errWriter io.Writer) *appLogger {
-	return &appLogger{
-		loggerName: _loggerName,
-		stdLogger:  log.New(_stdWriter, "", log.LstdFlags),
-		errLogger:  log.New(_errWriter, "", log.LstdFlags),
+var (
+	stdLogger *appLogger
+	errLogger *appLogger
+	logLevel  int
+)
+
+func init() {
+	stdLogger = &appLogger{logger: log.New(os.Stdout, "", log.LstdFlags)}
+	errLogger = &appLogger{logger: log.New(os.Stderr, "", log.LstdFlags)}
+	logLevel = 2
+}
+
+func SetLogLevel(_level LogLevel) {
+	if int(_level) < int(LogLevelDebug) {
+		_level = LogLevelDebug
 	}
-}
-
-func (al *appLogger) ChangeWriter(_stdWriter, _errWriter io.Writer) {
-	al.stdLogger.SetOutput(_stdWriter)
-	al.errLogger.SetOutput(_errWriter)
-}
-
-func (al appLogger) compose(_flag string) []interface{} {
-	v := []interface{}{
-		fmt.Sprintf("[%s]", _flag),
+	if int(_level) > int(LogLevelFatal) {
+		_level = LogLevelFatal
 	}
-	if len(al.loggerName) > 0 {
-		v = append(v, fmt.Sprintf("[%s]", al.loggerName))
+	logLevel = int(_level)
+}
+
+func InitLoggerByWriter(_stdWriter, _errWriter io.Writer) {
+	stdLogger = &appLogger{logger: log.New(_stdWriter, "", log.LstdFlags)}
+	errLogger = &appLogger{logger: log.New(_errWriter, "", log.LstdFlags)}
+}
+
+func Error(v ...interface{}) {
+	if logLevel > int(LogLevelError) {
+		return
 	}
-	return v
+	v = append([]interface{}{
+		"[ERROR]",
+	}, v...)
+	errLogger.logger.Println(v...)
 }
 
-func (al appLogger) Error(v ...interface{}) {
-	v = append(al.compose("ERROR"), v...)
-	al.errLogger.Println(v...)
+func Fatal(v ...interface{}) {
+	if logLevel > int(LogLevelFatal) {
+		return
+	}
+	Error(v...)
+	os.Exit(2)
 }
 
-func (al appLogger) Fatal(v ...interface{}) {
-	v = append(al.compose("FATAL"), v...)
-	al.errLogger.Fatalln(v...)
+func Warn(v ...interface{}) {
+	if logLevel > int(LogLevelWarn) {
+		return
+	}
+	v = append([]interface{}{
+		"[ WARN]",
+	}, v...)
+	errLogger.logger.Println(v...)
 }
 
-func (al appLogger) Panic(v ...interface{}) {
-	v = append(al.compose("PANIC"), v...)
-	al.errLogger.Panicln(v...)
+func Info(v ...interface{}) {
+	if logLevel > int(LogLevelInfo) {
+		return
+	}
+	v = append([]interface{}{
+		"[ INFO]",
+	}, v...)
+	stdLogger.logger.Println(v...)
 }
 
-func (al appLogger) Warn(v ...interface{}) {
-	v = append(al.compose(" WARN"), v...)
-	al.stdLogger.Println(v...)
-}
-
-func (al appLogger) Info(v ...interface{}) {
-	v = append(al.compose(" INFO"), v...)
-	al.stdLogger.Println(v...)
+func Debug(v ...interface{}) {
+	if logLevel > int(LogLevelDebug) {
+		return
+	}
+	v = append([]interface{}{
+		"[DEBUG]",
+	}, v...)
+	stdLogger.logger.Println(v...)
 }
