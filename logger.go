@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime"
 )
 
 type LogLevel int
@@ -59,9 +60,13 @@ func (al *appLogger) Error(v ...interface{}) {
 	if al.level.HigherThan(LogLevelError) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[ERROR]",
-	}, v...)
+	}
+	if _, fileName, lineNum, ok := runtime.Caller(1); ok {
+		headList = append(headList, fmt.Sprintf("%s:%d", fileName, lineNum))
+	}
+	v = append(headList, v...)
 	err := al.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "appLogger Error Output error:", err)
@@ -72,9 +77,13 @@ func (al *appLogger) Fatal(v ...interface{}) {
 	if al.level.HigherThan(LogLevelFatal) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[FATAL]",
-	}, v...)
+	}
+	if _, fileName, lineNum, ok := runtime.Caller(1); ok {
+		headList = append(headList, fmt.Sprintf("%s:%d", fileName, lineNum))
+	}
+	v = append(headList, v...)
 	err := al.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "appLogger Fatal Output error:", err)
@@ -86,9 +95,10 @@ func (al *appLogger) Warn(v ...interface{}) {
 	if al.level.HigherThan(LogLevelWarn) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[ WARN]",
-	}, v...)
+	}
+	v = append(headList, v...)
 	err := al.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "appLogger Warn Output error:", err)
@@ -99,9 +109,10 @@ func (al *appLogger) Info(v ...interface{}) {
 	if al.level.HigherThan(LogLevelInfo) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[ INFO]",
-	}, v...)
+	}
+	v = append(headList, v...)
 	err := al.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "appLogger Info Output error:", err)
@@ -112,9 +123,13 @@ func (al *appLogger) Debug(v ...interface{}) {
 	if al.level.HigherThan(LogLevelDebug) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[DEBUG]",
-	}, v...)
+	}
+	if _, fileName, lineNum, ok := runtime.Caller(1); ok {
+		headList = append(headList, fmt.Sprintf("%s:%d", fileName, lineNum))
+	}
+	v = append(headList, v...)
 	err := al.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "appLogger Debug Output error:", err)
@@ -172,9 +187,13 @@ func Error(v ...interface{}) {
 	if errLogger.level.HigherThan(LogLevelError) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[ERROR]",
-	}, v...)
+	}
+	if _, fileName, lineNum, ok := runtime.Caller(1); ok {
+		headList = append(headList, fmt.Sprintf("%s:%d", fileName, lineNum))
+	}
+	v = append(headList, v...)
 	err := errLogger.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Logger Error Output error:", err)
@@ -185,9 +204,13 @@ func Fatal(v ...interface{}) {
 	if errLogger.level.HigherThan(LogLevelFatal) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[FATAL]",
-	}, v...)
+	}
+	if _, fileName, lineNum, ok := runtime.Caller(1); ok {
+		headList = append(headList, fmt.Sprintf("%s:%d", fileName, lineNum))
+	}
+	v = append(headList, v...)
 	err := errLogger.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Logger Fatal Output error:", err)
@@ -199,9 +222,10 @@ func Warn(v ...interface{}) {
 	if stdLogger.level.HigherThan(LogLevelWarn) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[ WARN]",
-	}, v...)
+	}
+	v = append(headList, v...)
 	err := stdLogger.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Logger Warn Output error:", err)
@@ -212,9 +236,10 @@ func Info(v ...interface{}) {
 	if stdLogger.level.HigherThan(LogLevelInfo) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[ INFO]",
-	}, v...)
+	}
+	v = append(headList, v...)
 	err := stdLogger.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Logger Info Output error:", err)
@@ -225,9 +250,13 @@ func Debug(v ...interface{}) {
 	if stdLogger.level.HigherThan(LogLevelDebug) {
 		return
 	}
-	v = append([]interface{}{
+	headList := []interface{}{
 		"[DEBUG]",
-	}, v...)
+	}
+	if _, fileName, lineNum, ok := runtime.Caller(1); ok {
+		headList = append(headList, fmt.Sprintf("%s:%d", fileName, lineNum))
+	}
+	v = append(headList, v...)
 	err := stdLogger.logger.Output(2, fmt.Sprintln(v...))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Logger Debug Output error:", err)
