@@ -157,6 +157,11 @@ func NewCustomLoggerWithName(_name string) *appLogger {
 	return &appLogger{logger: log.New(os.Stdout, _name, log.LstdFlags), level: LogLevelInfo}
 }
 
+func ResetName(_name string) {
+	stdLogger = &appLogger{logger: log.New(os.Stdout, _name, log.LstdFlags), level: LogLevelInfo}
+	errLogger = &appLogger{logger: log.New(os.Stderr, _name, log.LstdFlags), level: LogLevelInfo}
+}
+
 // SetLogFlags
 // default: log.LstdFlags
 // example 1: log.LstdFlags | log.Lmicroseconds | log.Llongfile
