@@ -8,6 +8,18 @@ import (
 	"runtime"
 )
 
+type ILogger interface {
+	SetLogFlags(_flagCode int)
+	SetLogLevel(_level LogLevel)
+	SetWriter(_writer io.Writer)
+	SetName(_name string)
+	Error(v ...interface{})
+	Fatal(v ...interface{})
+	Warn(v ...interface{})
+	Info(v ...interface{})
+	Debug(v ...interface{})
+}
+
 type appLogger struct {
 	level  LogLevel
 	logger *log.Logger
